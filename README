@@ -1,0 +1,3 @@
+Dependencies
+  glib-2.x (version >= 2.32)
+  gssdp (version >= ??)
