@@ -1,3 +1,26 @@
-Dependencies
+C++ Philips hue library
+
+1.0 General
+
+  A library to commuicate with philips hue bridges (see 
+  https://www.meethue.com/). It is based on glib and libgupnp!
+
+2.0 Building
+
+2.1 Dependencies
   glib-2.x (version >= 2.32)
   gssdp (version >= ??)
+
+3.0 Repository
+
+  
+  
+4.0 License
+  The code of this project is published under the GPL version 3.0.
+  See COPYING for license details.
+  
+5.0 Author information
+
+  Creator
+    Paul Konstantin Gerke
+    email: paulkgerke(a)craftware.nl
