@@ -23,16 +23,24 @@
 #include <boost/lexical_cast.hpp>
 
 int main(int argc, char** argv) {
-  philips::hue::Discoverer discoverer;
+  using philips::hue::Discoverer;
   
+  Discoverer discoverer;
+
   std::string line;
   do {
     std::getline(std::cin, line);
     try {
-      philips::hue::Discoverer::TimeoutDelay i = boost::lexical_cast<philips::hue::Discoverer::TimeoutDelay>(line);
+      Discoverer::TimeoutDelay i = boost::lexical_cast<Discoverer::TimeoutDelay>(line);
       discoverer.setRescanInterval(i);
     }
     catch (boost::bad_lexical_cast) {
+    }
+    
+    Discoverer::AddressVector discoveredAddresses = discoverer.getAddresses();
+    std::cout << "Found until now" << std::endl;
+    for (Discoverer::AddressVector::iterator it = discoveredAddresses.begin(); it != discoveredAddresses.end(); it++) {
+      std::cout << "  " << it->getDescriptorURL() << std::endl;
     }
   } while (line != "exit");
   

@@ -23,8 +23,38 @@
 namespace philips {
   namespace hue {
     std::string DiscoveredDeviceAddress :: getURL() {
-      return url;
+      if (connected) {
+        return url;
+      }
+      return std::string();
     }
+
+    std::string DiscoveredDeviceAddress :: getDescriptorURL() const {
+      return descriptorUrl;
+    }
+    
+    DiscoveredDeviceAddress& DiscoveredDeviceAddress :: operator=(const DiscoveredDeviceAddress& other) {
+      descriptorUrl = other.descriptorUrl;
+
+      connected = other.connected;
+      url = other.url;
+      
+      return *this;
+    }
+    
+    DiscoveredDeviceAddress :: DiscoveredDeviceAddress() : connected(false) {
+      descriptorUrl = "";
+    }
+    
+    DiscoveredDeviceAddress :: DiscoveredDeviceAddress(const std::string& descriptorUrl) : connected(false) {
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      this->descriptorUrl = descriptorUrl;
+    }
+    
+    DiscoveredDeviceAddress :: DiscoveredDeviceAddress(const DiscoveredDeviceAddress& other) {
+      this->operator=(other);
+    }
+
 
     void Discoverer :: init(const std::string* address) {
       GError* error = NULL;
@@ -93,10 +123,11 @@ namespace philips {
     }
     
     void Discoverer :: handleResourceAvailable(gchar *usn, gpointer locations) {
-      std::cout << "Discovered " << usn << std::endl;
       GList* list = static_cast<GList*>(locations);
+      
       while (list != NULL) {
-        std::cout << "  " << static_cast<char*>(list->data) << std::endl;
+        std::string descriptorUrl = std::string(static_cast<char*>(list->data));
+        addDiscoveredAddress(descriptorUrl);
         list = list->next;
       }
     }
@@ -106,7 +137,7 @@ namespace philips {
     }
     
     void Discoverer :: handleResourceUnavailable(gchar *usn) {
-      std::cout << "Lost " << usn << std::endl;
+      // "Un-discovery" is done in handleRescaneTimeout by throwing away all "removedAddresses"
     }
 
     gboolean Discoverer :: handleRescanTimeoutStatic(gpointer userdata) {
@@ -125,6 +156,11 @@ namespace philips {
           registerNewRescanTimer();
         }
       }
+      
+      // Adapt list of detected/undetected devices
+      removedAddresses = addresses;
+      addresses.clear();
+      
       g_rec_mutex_unlock(&mainLoopMutex);
 
       // Start rescan
@@ -134,7 +170,36 @@ namespace philips {
       return result;
     }
     
-    Discoverer::AddressPtrVector Discoverer :: getAddresses() {
+    void Discoverer :: addDiscoveredAddress(const std::string& descriptorUrl) {
+      g_rec_mutex_lock(&mainLoopMutex);
+      bool recovered = false;
+      for (AddressPtrVector::iterator it = removedAddresses.begin(); it != removedAddresses.end(); it++) {
+        if (descriptorUrl == (*it)->getDescriptorURL()) {
+          addresses.push_back(*it);
+          removedAddresses.erase(it);
+          recovered = true;
+          break;
+        }
+      }
+      
+      if (!recovered) {
+        addresses.push_back(DiscoveredDeviceAddress::Ptr(new DiscoveredDeviceAddress(descriptorUrl)));
+      }
+      g_rec_mutex_unlock(&mainLoopMutex);
+    }
+    
+    Discoverer::AddressVector Discoverer :: getAddresses() {
+      g_rec_mutex_lock(&mainLoopMutex);
+      AddressVector result;
+      result.reserve(addresses.size());
+      for (AddressPtrVector::iterator it = addresses.begin(); it != addresses.end(); it++) {
+        result.push_back(**it);
+      }
+      for (AddressPtrVector::iterator it = removedAddresses.begin(); it != removedAddresses.end(); it++) {
+        result.push_back(**it);
+      }
+      g_rec_mutex_unlock(&mainLoopMutex);
+      return result;
     }
   
     Discoverer::TimeoutDelay Discoverer :: getRescanInterval() {
@@ -154,11 +219,11 @@ namespace philips {
       g_rec_mutex_unlock(&mainLoopMutex);
     }
   
-    Discoverer :: Discoverer() : mainLoopThread(NULL), mainLoopMutex(), context(NULL), mainLoop(NULL), client(NULL), browser(NULL) {
+    Discoverer :: Discoverer() : mainLoopThread(NULL), mainLoopMutex(), context(NULL), mainLoop(NULL), client(NULL), browser(NULL), addresses(), removedAddresses() {
       init(NULL);
     }
     
-    Discoverer :: Discoverer(const std::string& interface) : mainLoopThread(NULL), mainLoopMutex(), context(NULL), mainLoop(NULL), client(NULL), browser(NULL) {
+    Discoverer :: Discoverer(const std::string& interface) : mainLoopThread(NULL), mainLoopMutex(), context(NULL), mainLoop(NULL), client(NULL), browser(NULL), addresses(), removedAddresses() {
       init(&interface);
     }
     
@@ -188,3 +253,5 @@ namespace philips {
     }
   }
 }
+
+#include "CurlInitializer.icpp"

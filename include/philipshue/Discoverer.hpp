@@ -22,6 +22,8 @@
 #include <vector>
 #include <stdexcept>
 
+#include <curl/curl.h>
+
 #include <glib-2.0/glib.h>
 #include <libgssdp/gssdp.h>
 
@@ -33,15 +35,27 @@ namespace philips {
       public:
         typedef Pointer<DiscoveredDeviceAddress>::type Ptr;
       private:
+        std::string descriptorUrl;
+        
+        bool connected;
         std::string url;
       public:
         virtual std::string getURL();
+        
+        virtual std::string getDescriptorURL() const;
+        
+        DiscoveredDeviceAddress& operator=(const DiscoveredDeviceAddress& other);
+        
+        DiscoveredDeviceAddress();
+        DiscoveredDeviceAddress(const std::string& descriptorUrl);
+        DiscoveredDeviceAddress(const DiscoveredDeviceAddress& other);
     };
     
     class Discoverer {
       public:
         typedef DiscoveredDeviceAddress Address;
         typedef std::vector<Address::Ptr> AddressPtrVector;
+        typedef std::vector<Address> AddressVector;
         
         typedef unsigned int TimeoutDelay;
         
@@ -62,6 +76,8 @@ namespace philips {
         GSource* rescanTimeout;
         
         TimeoutDelay rescanInterval, currentRescanInterval;
+        
+        AddressPtrVector addresses, removedAddresses;
 
         void init(const std::string* address);
         void registerNewRescanTimer();
@@ -77,8 +93,10 @@ namespace philips {
         
         static gboolean handleRescanTimeoutStatic(gpointer userdata);
         bool handleRescanTimeout();
+        
+        void addDiscoveredAddress(const std::string& descriptorUrl);
       public:
-        virtual AddressPtrVector getAddresses();
+        virtual AddressVector getAddresses();
         
         virtual TimeoutDelay getRescanInterval();
         virtual void setRescanInterval(TimeoutDelay interval);

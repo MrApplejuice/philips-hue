@@ -15,16 +15,13 @@
 */
 
 
-#pragma once
+#include <curl/curl.h>
 
-#include <boost/shared_ptr.hpp>
+class InitializeCurl {
+  public:
+    InitializeCurl() {
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+    }
+};
 
-namespace philips {
-  namespace hue {
-    // Which pointer type to use to hold references to objects
-    template<class T>
-    struct Pointer {
-      typedef boost::shared_ptr<T> type;
-    };
-  }
-}
+static InitializeCurl initCurl;
