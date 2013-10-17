@@ -11,9 +11,10 @@ C++ Philips hue library
   glib-2.x (version >= 2.32)
   gssdp (version >= ??)
 
-3.0 Repository
+3.0 Code repository
 
-  
+  The original code repository can be found at: 
+    https://github.com/MrApplejuice/philips-hue
   
 4.0 License
   The code of this project is published under the GPL version 3.0.
