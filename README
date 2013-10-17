@@ -8,8 +8,12 @@ C++ Philips hue library
 2.0 Building
 
 2.1 Dependencies
+  (Version indications show the lowest library versions that the 
+  philips-hue was linked against and tested with)
+
   glib-2.x (version >= 2.32)
-  gssdp (version >= ??)
+  gssdp (version >= 1.0)
+  boost (version >= 1.53)
 
 3.0 Code repository
 
