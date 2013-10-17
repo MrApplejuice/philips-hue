@@ -2,7 +2,7 @@ C++ Philips hue library
 
 1.0 General
 
-  A library to commuicate with philips hue bridges (see 
+  A C++ library to commuicate with philips hue bridges (see 
   https://www.meethue.com/). It is based on glib and libgupnp!
 
 2.0 Building
