@@ -1,3 +1,19 @@
+/*  This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  
+    Author: Paul Konstantin Gerke (email: paulkgerke(a)craftware.nl)  
+*/
+
 #include <philipshue/Discoverer.hpp>
 
 #define PHILIPS_HUE_UUID "uuid:2f402f80-da50-11e1-9b23-0017880a83d4"
